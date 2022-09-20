@@ -1,0 +1,108 @@
+
+---
+title: "Innlevering 2"
+author: "Amund"
+date: '2022-09-20'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Utfordring 2.3
+
+Setter opp slik at plottene kan kjøres
+
+```{r }
+setwd("/Users/amundbech1/Desktop/sok-2008")
+
+library(readr)
+library(ggplot2)     
+library(tidyverse) 
+library(readr)
+library(plyr)
+library(dplyr)
+
+union<- read_csv("https://uit-sok-2008-h22.github.io/Assets/union_unempl.csv") #This loads the data with information about the variables of interest
+
+
+#Changing the name of a single observation. The below code changes all observations called "United Kingdom" to "UK" in the union data. 
+union$country <- gsub("United Kingdom", "UK", union$country)
+
+# Renaming a variable. The below code renames the variable "Country" to "Region".
+names(union)[names(union) == "country"] <- "region"
+
+#Excess coverage
+union$excess_cover<-union$coverage - union$density #
+
+
+
+
+#Lager dataset fra verden og kombinerer med vårt dataset
+mapdata <- map_data("world") 
+mapdata <- left_join(mapdata, union, by="region")
+
+# Lager et nytt dataset som fjerner alle NA values
+mapdata_unempl<- mapdata %>% filter(!is.na(mapdata$unempl))
+```
+
+
+```{r }
+map1 <- ggplot(mapdata_unempl, aes( x = long, y = lat, group=group)) +
+  geom_polygon(aes(fill = unempl), color = "black") +
+  scale_fill_gradient(name = "Arbrbeidsledighetsrate", low = "yellow", high = 
+                        "red", na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y=element_blank(),
+        axis.title.x=element_blank(),
+        rect = element_blank())
+map1
+```
+Over ser vi et plot over arbeidsledigheten. Den viser at de nordiske landene samt sentral europa og østlige land har relativt lav arbeidsledighet. De landene med høy arbeidsledighet er de sørlige landene i Europa.
+
+
+```{r}
+map3 <- ggplot(mapdata_unempl, aes( x = long, y = lat, group=group)) +
+  geom_polygon(aes(fill = density), color = "black") + 
+  scale_fill_gradient(name = "Faforeningsdensitet", low = "pink", 
+                      high =  "red", na.value = "grey50") +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y=element_blank(),
+        axis.title.x=element_blank(),
+        rect = element_blank())
+map3
+```
+Dette plottet viser fagforeningsdensiteten i Europa. Her vises det at de nordiske landene har høyere fagforeningsdensitet enn de andre landene i Europa.
+
+
+```{r}
+map5 <- ggplot(mapdata_unempl, aes( x = long, y = lat, group=group)) +
+  geom_polygon(aes(fill = excess_cover), color = "black")+ 
+  scale_fill_gradient(name = "Excess coverage", low = "pink", high =  "red", na.value = "grey50")+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.y=element_blank(),
+        axis.title.x=element_blank(),
+        rect = element_blank())
+map5
+```
+Plottet over viser excess coverage 
+
+```{r}
+map6 <- ggplot(mapdata_unempl, aes( x = long, y = lat, group=group)) +
+  geom_polygon(aes(fill = coord), color = "black")
+map6
+```
+
+I dette plottet vises hvordan koordingering av lønnsfastsettelse
+
+
+Grunnen til at det er sterke fagforeninger og lav arbeidsledighet i de nordiske landene kan være at det er kollektive avtaler mellom interessese organiasjoner og arbeidsgiver, eller for eksempel at fagforeningene i norden er mye større enn andre plasser i Europa. 
+
+Sammenlignet med kapittel 3 i Boeri og van Ours er at plottene vist her er veldig like med det som vises i boken. 
